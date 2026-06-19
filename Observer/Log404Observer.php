@@ -9,6 +9,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\Request\Http;
+use Etechflow\RedirectManager\Model\LicenseValidator;
 use Etechflow\RedirectManager\Model\ResourceModel\Log as LogResource;
 
 /**
@@ -20,7 +21,8 @@ class Log404Observer implements ObserverInterface
         private ScopeConfigInterface $scopeConfig,
         private StoreManagerInterface $storeManager,
         private Http $request,
-        private LogResource $logResource
+        private LogResource $logResource,
+        private LicenseValidator $licenseValidator
     ) {
     }
 
@@ -28,6 +30,7 @@ class Log404Observer implements ObserverInterface
     {
         if (!$this->scopeConfig->isSetFlag('etechflow_redirectmanager/general/enabled', ScopeInterface::SCOPE_STORE)
             || !$this->scopeConfig->isSetFlag('etechflow_redirectmanager/log404/enabled', ScopeInterface::SCOPE_STORE)
+            || !$this->licenseValidator->isValid()
         ) {
             return;
         }

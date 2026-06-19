@@ -12,6 +12,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\App\Action\Redirect as RedirectAction;
+use Etechflow\RedirectManager\Model\LicenseValidator;
 use Etechflow\RedirectManager\Model\ResourceModel\Redirect\CollectionFactory;
 use Etechflow\RedirectManager\Model\ResourceModel\Redirect as RedirectResource;
 
@@ -28,13 +29,18 @@ class Router implements RouterInterface
         private StoreManagerInterface $storeManager,
         private UrlInterface $url,
         private CollectionFactory $collectionFactory,
-        private RedirectResource $redirectResource
+        private RedirectResource $redirectResource,
+        private LicenseValidator $licenseValidator
     ) {
     }
 
     public function match(RequestInterface $request)
     {
         if (!$this->scopeConfig->isSetFlag('etechflow_redirectmanager/general/enabled', ScopeInterface::SCOPE_STORE)) {
+            return null;
+        }
+        // License gate: an unlicensed install fires no managed redirects.
+        if (!$this->licenseValidator->isValid()) {
             return null;
         }
         $path = trim((string)$request->getPathInfo(), '/');
